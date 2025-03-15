@@ -1,0 +1,71 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  annotations:
+    kompose.cmd: kompose convert
+    kompose.version: 1.35.0 (HEAD)
+  labels:
+    io.kompose.service: haproxy1
+  name: haproxy1
+spec:
+  containers:
+    - env:
+        - name: LOAD_BALANCER_NAME
+          value: lb1
+      image: haproxy_image
+      name: haproxy1
+      ports:
+        - containerPort: 80
+          protocol: TCP
+        - containerPort: 443
+          protocol: TCP
+      securityContext:
+        capabilities:
+          add:
+            - NET_ADMIN
+      stdin: true
+      tty: true
+      volumeMounts:
+        - mountPath: /usr/local/etc/haproxy/haproxy.cfg
+          name: haproxy1-cm0
+          subPath: haproxy.cfg
+        - mountPath: /usr/local/usr/local/etc/default/haproxy
+          name: haproxy1-cm1
+          subPath: haproxy
+        - mountPath: /etc/keepalived/keepalived.conf
+          name: haproxy1-cm2
+          subPath: keepalived.conf
+        - mountPath: /tmp/capture
+          name: haproxy1-cm3
+        - mountPath: /usr/local/etc/haproxy/certificates/haproxy_cert.pem
+          name: haproxy1-cm4
+          subPath: haproxy_cert.pem
+  restartPolicy: OnFailure
+  volumes:
+    - configMap:
+        items:
+          - key: haproxy1.cfg
+            path: haproxy.cfg
+        name: haproxy1-cm0
+      name: haproxy1-cm0
+    - configMap:
+        items:
+          - key: haproxy
+            path: haproxy
+        name: haproxy1-cm1
+      name: haproxy1-cm1
+    - configMap:
+        items:
+          - key: keepalived.conf
+            path: keepalived.conf
+        name: haproxy1-cm2
+      name: haproxy1-cm2
+    - configMap:
+        name: haproxy1-cm3
+      name: haproxy1-cm3
+    - configMap:
+        items:
+          - key: cert_comun.pem
+            path: haproxy_cert.pem
+        name: haproxy1-cm4
+      name: haproxy1-cm4

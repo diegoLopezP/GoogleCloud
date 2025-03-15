@@ -1,0 +1,52 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  annotations:
+    kompose.cmd: kompose convert
+    kompose.version: 1.35.0 (HEAD)
+  labels:
+    io.kompose.service: flask1lb
+  name: flask1lb
+spec:
+  containers:
+    - env:
+        - name: PGID
+          value: "1000"
+        - name: PUID
+          value: "1000"
+        - name: SERVERID
+          value: "1"
+        - name: SSLKEYLOGFILE
+          valueFrom:
+            configMapKeyRef:
+              key: SSLKEYLOGFILE
+              name: env
+        - name: TZ
+          value: Etc/UTC
+      image: flask_srv
+      name: flask1lb
+      ports:
+        - containerPort: 80
+          protocol: TCP
+        - containerPort: 443
+          protocol: TCP
+      stdin: true
+      tty: true
+      volumeMounts:
+        - mountPath: /app
+          name: flask1lb-cm0
+        - mountPath: /certificates
+          name: flask1lb-cm1
+        - mountPath: /tmp/capture
+          name: flask1lb-cm2
+  restartPolicy: OnFailure
+  volumes:
+    - configMap:
+        name: flask1lb-cm0
+      name: flask1lb-cm0
+    - configMap:
+        name: flask1lb-cm1
+      name: flask1lb-cm1
+    - configMap:
+        name: flask1lb-cm2
+      name: flask1lb-cm2
